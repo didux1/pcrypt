@@ -4,4 +4,9 @@
 	"type": "library",
 	"keywords": ["crypt", "mcrypt"],
 	"license": "GNU GPL v3",
+	"autoload": {
+		"psr-0": {
+			"UAM": "lib/"
+		}
+	}
 }	
