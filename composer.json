@@ -1,0 +1,7 @@
+{
+	"name": "opichon/pcrypt",
+	"description": "Port of pcrypt library",
+	"type": "library",
+	"keywords": ["crypt", "mcrypt"],
+	"license": "GNU GPL v3",
+}	
