@@ -52,13 +52,17 @@
  * You can freely make any changes you want to the code and can use it however you like, including redistribution.
  * In the interests of the (OSI) Open-Source-Initiative the copyright and license block at the top must remain intact.
  */
-class pcrypt {
-  var $cipher_key;
-  var $cipher;
-  var $iv;
+namespace UAM\Pcrypt;
+
+class pcrypt
+{
+  public $cipher_key;
+  public $cipher;
+  public $iv;
 
   // constructor php 5
-  function __construct($c_key, $append='') {
+  public function __construct($c_key, $append='')
+  {
     $this->make_key($c_key.$append);
   }
   // constructor php 4
@@ -68,7 +72,8 @@ class pcrypt {
   } */
 
   // destructor php 5 (auto cleanup)
-  function __destruct() {
+  public function __destruct()
+  {
     mcrypt_module_close($this->cipher);
   unset($this->cipher);
     unset($this->iv);
@@ -78,28 +83,34 @@ class pcrypt {
   // its always a good idea to allow for backward compatability (EG: php4).
   // To use safely, check the php version first EG:
   // if(version_compare(PHP_VERSION, '5', '<' )) $encryptor->destruct_cipher();
-  function destruct_cipher() {
+  public function destruct_cipher()
+  {
     if(isset($this->cipher)) $this->__destruct();
   }
 
   // public ciphering function
-  function cipher($plain_text) {
+  public function cipher($plain_text)
+  {
     mcrypt_generic_init($this->cipher, $this->cipher_key, $this->iv);
     $encrypted = mcrypt_generic($this->cipher, $this->urlsafe_b64encode($plain_text));
     mcrypt_generic_deinit($this->cipher);
+
     return $this->urlsafe_b64encode($encrypted);
   }
   // public deciphering function
-  function decipher($cipher_text) {
+  public function decipher($cipher_text)
+  {
     mcrypt_generic_init($this->cipher, $this->cipher_key, $this->iv);
     $decrypted = mdecrypt_generic($this->cipher, $this->urlsafe_b64decode($cipher_text));
     mcrypt_generic_deinit($this->cipher);
+
     return $this->urlsafe_b64decode($decrypted);
   }
 
   // semi private make_key function. Can be called if you require a new key
   // for an existing instance of this class
-  function make_key($c_key){
+  public function make_key($c_key)
+  {
     // MCRYPT_3DES
     // MCRYPT_BLOWFISH
     // MCRYPT_RIJNDAEL_256
@@ -126,16 +137,19 @@ class pcrypt {
   // The Base64 functions (below) were copied from the php manual
   // All credit for these go to: Massimo Scamarcia (massimo dot scamarcia at gmail dot com)
   // Page: http://us2.php.net/manual/en/function.base64-encode.php#63543
-  function urlsafe_b64encode($string) {
+  public function urlsafe_b64encode($string)
+  {
     $data = base64_encode($string);
     $data = str_replace(array('+','/','='),array('-','_','.'),$data);
+
     return $data;
   }
-  function urlsafe_b64decode($string) {
+  public function urlsafe_b64decode($string)
+  {
     $data = str_replace(array('-','_','.'),array('+','/','='),$string);
     $mod4 = strlen($data) % 4;
     if($mod4) $data .= substr('====', $mod4);
+
     return base64_decode($data);
   }
 }
-?>
