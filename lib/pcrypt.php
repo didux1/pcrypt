@@ -52,7 +52,6 @@
  * You can freely make any changes you want to the code and can use it however you like, including redistribution.
  * In the interests of the (OSI) Open-Source-Initiative the copyright and license block at the top must remain intact.
  */
-namespace UAM\Pcrypt;
 
 class pcrypt
 {
