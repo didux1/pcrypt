@@ -55,100 +55,100 @@
 
 class pcrypt
 {
-  public $cipher_key;
-  public $cipher;
-  public $iv;
+	public $cipher_key;
+	public $cipher;
+	public $iv;
 
-  // constructor php 5
-  public function __construct($c_key, $append='')
-  {
-    $this->make_key($c_key.$append);
-  }
-  // constructor php 4
-  // (use this one in your code for safety)
+	// constructor php 5
+	public function __construct($c_key, $append='')
+	{
+		$this->make_key($c_key.$append);
+	}
+	// constructor php 4
+	// (use this one in your code for safety)
 /*  function pcrypt($c_key, $append='') {
-    $this->__construct($c_key, $append);
-  } */
+		$this->__construct($c_key, $append);
+	} */
 
-  // destructor php 5 (auto cleanup)
-  public function __destruct()
-  {
-    mcrypt_module_close($this->cipher);
-  unset($this->cipher);
-    unset($this->iv);
-    unset($this->cipher_key);
-  }
-  // destructor php 4 (manual trigger)
-  // its always a good idea to allow for backward compatability (EG: php4).
-  // To use safely, check the php version first EG:
-  // if(version_compare(PHP_VERSION, '5', '<' )) $encryptor->destruct_cipher();
-  public function destruct_cipher()
-  {
-    if(isset($this->cipher)) $this->__destruct();
-  }
+	// destructor php 5 (auto cleanup)
+	public function __destruct()
+	{
+		mcrypt_module_close($this->cipher);
+	unset($this->cipher);
+		unset($this->iv);
+		unset($this->cipher_key);
+	}
+	// destructor php 4 (manual trigger)
+	// its always a good idea to allow for backward compatability (EG: php4).
+	// To use safely, check the php version first EG:
+	// if(version_compare(PHP_VERSION, '5', '<' )) $encryptor->destruct_cipher();
+	public function destruct_cipher()
+	{
+		if(isset($this->cipher)) $this->__destruct();
+	}
 
-  // public ciphering function
-  public function cipher($plain_text)
-  {
-    mcrypt_generic_init($this->cipher, $this->cipher_key, $this->iv);
-    $encrypted = mcrypt_generic($this->cipher, $this->urlsafe_b64encode($plain_text));
-    mcrypt_generic_deinit($this->cipher);
+	// public ciphering function
+	public function cipher($plain_text)
+	{
+		mcrypt_generic_init($this->cipher, $this->cipher_key, $this->iv);
+		$encrypted = mcrypt_generic($this->cipher, $this->urlsafe_b64encode($plain_text));
+		mcrypt_generic_deinit($this->cipher);
 
-    return $this->urlsafe_b64encode($encrypted);
-  }
-  // public deciphering function
-  public function decipher($cipher_text)
-  {
-    mcrypt_generic_init($this->cipher, $this->cipher_key, $this->iv);
-    $decrypted = mdecrypt_generic($this->cipher, $this->urlsafe_b64decode($cipher_text));
-    mcrypt_generic_deinit($this->cipher);
+		return $this->urlsafe_b64encode($encrypted);
+	}
+	// public deciphering function
+	public function decipher($cipher_text)
+	{
+		mcrypt_generic_init($this->cipher, $this->cipher_key, $this->iv);
+		$decrypted = mdecrypt_generic($this->cipher, $this->urlsafe_b64decode($cipher_text));
+		mcrypt_generic_deinit($this->cipher);
 
-    return $this->urlsafe_b64decode($decrypted);
-  }
+		return $this->urlsafe_b64decode($decrypted);
+	}
 
-  // semi private make_key function. Can be called if you require a new key
-  // for an existing instance of this class
-  public function make_key($c_key)
-  {
-    // MCRYPT_3DES
-    // MCRYPT_BLOWFISH
-    // MCRYPT_RIJNDAEL_256
-  $key_cipher = mcrypt_module_open(MCRYPT_RIJNDAEL_256,'',MCRYPT_MODE_CBC,'');
-    $iv_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_CBC);
-    $_iv = substr(sha1($c_key), 0, $iv_size); // temp iv for salt creation
-    $_key = substr(md5($c_key), 0, $iv_size); // temp key for salt creation
+	// semi private make_key function. Can be called if you require a new key
+	// for an existing instance of this class
+	public function make_key($c_key)
+	{
+		// MCRYPT_3DES
+		// MCRYPT_BLOWFISH
+		// MCRYPT_RIJNDAEL_256
+	$key_cipher = mcrypt_module_open(MCRYPT_RIJNDAEL_256,'',MCRYPT_MODE_CBC,'');
+		$iv_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_CBC);
+		$_iv = substr(sha1($c_key), 0, $iv_size); // temp iv for salt creation
+		$_key = substr(md5($c_key), 0, $iv_size); // temp key for salt creation
 
-    /// create secret cipher key
-    mcrypt_generic_init($key_cipher, $_key, $_iv);
-    $c_key = mcrypt_generic($key_cipher, $this->urlsafe_b64encode($c_key));
-    mcrypt_generic_deinit($key_cipher);
-    $c_key = $this->urlsafe_b64encode($c_key);
+		/// create secret cipher key
+		mcrypt_generic_init($key_cipher, $_key, $_iv);
+		$c_key = mcrypt_generic($key_cipher, $this->urlsafe_b64encode($c_key));
+		mcrypt_generic_deinit($key_cipher);
+		$c_key = $this->urlsafe_b64encode($c_key);
 
-    $this->cipher = $key_cipher; // active cipher
-    $this->iv = substr(md5($_iv), 0, $iv_size); // active iv
-    $this->cipher_key = substr(md5($c_key), 0, $iv_size); // active key
-  }
+		$this->cipher = $key_cipher; // active cipher
+		$this->iv = substr(md5($_iv), 0, $iv_size); // active iv
+		$this->cipher_key = substr(md5($c_key), 0, $iv_size); // active key
+	}
 
-  // helper functions to maintain cipher-algorythm and cookie compatibility
-  // regardless of contents.
-  // US-ASCII charset is used for encoding/decoding.
-  //
-  // The Base64 functions (below) were copied from the php manual
-  // All credit for these go to: Massimo Scamarcia (massimo dot scamarcia at gmail dot com)
-  // Page: http://us2.php.net/manual/en/function.base64-encode.php#63543
-  public function urlsafe_b64encode($string)
-  {
-    $data = base64_encode($string);
-    $data = str_replace(array('+','/','='),array('-','_','.'),$data);
+	// helper functions to maintain cipher-algorythm and cookie compatibility
+	// regardless of contents.
+	// US-ASCII charset is used for encoding/decoding.
+	//
+	// The Base64 functions (below) were copied from the php manual
+	// All credit for these go to: Massimo Scamarcia (massimo dot scamarcia at gmail dot com)
+	// Page: http://us2.php.net/manual/en/function.base64-encode.php#63543
+	public function urlsafe_b64encode($string)
+	{
+		$data = base64_encode($string);
+		$data = str_replace(array('+','/','='),array('-','_','.'),$data);
 
-    return $data;
-  }
-  public function urlsafe_b64decode($string)
-  {
-    $data = str_replace(array('-','_','.'),array('+','/','='),$string);
-    $mod4 = strlen($data) % 4;
-    if($mod4) $data .= substr('====', $mod4);
+		return $data;
+	}
+	public function urlsafe_b64decode($string)
+	{
+		$data = str_replace(array('-','_','.'),array('+','/','='),$string);
+		$mod4 = strlen($data) % 4;
+		if($mod4) $data .= substr('====', $mod4);
 
-    return base64_decode($data);
-  }
+		return base64_decode($data);
+	}
 }
