@@ -60,21 +60,16 @@ class pcrypt
 	public $iv;
 
 	// constructor php 5
-	public function __construct($c_key, $append='')
+	public function __construct($c_key, $append = '')
 	{
-		$this->make_key($c_key.$append);
+		$this->make_key($c_key . $append);
 	}
-	// constructor php 4
-	// (use this one in your code for safety)
-/*  function pcrypt($c_key, $append='') {
-		$this->__construct($c_key, $append);
-	} */
 
 	// destructor php 5 (auto cleanup)
 	public function __destruct()
 	{
 		mcrypt_module_close($this->cipher);
-	unset($this->cipher);
+		unset($this->cipher);
 		unset($this->iv);
 		unset($this->cipher_key);
 	}
@@ -84,7 +79,9 @@ class pcrypt
 	// if(version_compare(PHP_VERSION, '5', '<' )) $encryptor->destruct_cipher();
 	public function destruct_cipher()
 	{
-		if(isset($this->cipher)) $this->__destruct();
+		if (isset($this->cipher)) {
+			$this->__destruct();
+		}
 	}
 
 	// public ciphering function
@@ -96,6 +93,7 @@ class pcrypt
 
 		return $this->urlsafe_b64encode($encrypted);
 	}
+
 	// public deciphering function
 	public function decipher($cipher_text)
 	{
@@ -113,8 +111,8 @@ class pcrypt
 		// MCRYPT_3DES
 		// MCRYPT_BLOWFISH
 		// MCRYPT_RIJNDAEL_256
-	$key_cipher = mcrypt_module_open(MCRYPT_RIJNDAEL_256,'',MCRYPT_MODE_CBC,'');
-		$iv_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_CBC);
+		$key_cipher = mcrypt_module_open(\MCRYPT_RIJNDAEL_256, '', \MCRYPT_MODE_CBC, '');
+		$iv_size = mcrypt_get_iv_size(\MCRYPT_RIJNDAEL_256, \MCRYPT_MODE_CBC);
 		$_iv = substr(sha1($c_key), 0, $iv_size); // temp iv for salt creation
 		$_key = substr(md5($c_key), 0, $iv_size); // temp key for salt creation
 
@@ -139,13 +137,13 @@ class pcrypt
 	public function urlsafe_b64encode($string)
 	{
 		$data = base64_encode($string);
-		$data = str_replace(array('+','/','='),array('-','_','.'),$data);
+		$data = str_replace(array('+', '/', '='), array('-', '_', '.'), $data);
 
 		return $data;
 	}
 	public function urlsafe_b64decode($string)
 	{
-		$data = str_replace(array('-','_','.'),array('+','/','='),$string);
+		$data = str_replace(array('-', '_', '.'), array('+', '/', '='), $string);
 		$mod4 = strlen($data) % 4;
 		if($mod4) $data .= substr('====', $mod4);
 
